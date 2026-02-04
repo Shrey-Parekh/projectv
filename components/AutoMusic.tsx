@@ -6,53 +6,108 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function AutoMusic() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const hasStartedRef = useRef(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Start music on first user interaction (to bypass browser autoplay restrictions)
+  // Start music automatically: try unmuted first, then muted autoplay + unmute on first interaction
   useEffect(() => {
-    const startMusic = () => {
-      if (audioRef.current && !hasStartedRef.current) {
+    const events = ['click', 'touchstart', 'keydown'] as const;
+
+    const unmuteOnInteraction = () => {
+      if (audioRef.current && hasStartedRef.current) {
         audioRef.current.volume = 0.7;
-        audioRef.current.play().catch((err) => {
-          // Silently fail - browser may block autoplay
-          console.log('Music autoplay blocked:', err);
-        });
+        setIsMuted(false);
+      }
+      events.forEach((e) => document.removeEventListener(e, unmuteOnInteraction));
+    };
+
+    const startMusic = async () => {
+      if (!audioRef.current || hasStartedRef.current) return;
+      try {
+        audioRef.current.volume = 0.7;
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setIsMuted(false);
         hasStartedRef.current = true;
+        setHasStarted(true);
+        return;
+      } catch {
+        // Fallback: start muted (allowed by most browsers), unmute on first tap/click anywhere
+        try {
+          audioRef.current.volume = 0;
+          await audioRef.current.play();
+          setIsPlaying(true);
+          setIsMuted(true);
+          hasStartedRef.current = true;
+          setHasStarted(true);
+          events.forEach((e) => document.addEventListener(e, unmuteOnInteraction, { once: true }));
+        } catch (e2) {
+          console.log('Music autoplay blocked:', e2);
+        }
       }
     };
 
-    // Try to start on any user interaction
-    const events = ['click', 'touchstart', 'keydown', 'mousemove'];
-    
-    events.forEach((event) => {
-      document.addEventListener(event, startMusic, { once: true });
-    });
-
-    // Also try to start immediately (may work in some browsers)
-    const timer = setTimeout(() => {
-      if (audioRef.current && !hasStartedRef.current) {
-        audioRef.current.volume = 0.7;
-        audioRef.current.play().catch(() => {
-          // Will be triggered by user interaction instead
-        });
-        hasStartedRef.current = true;
-      }
-    }, 500);
-
+    const t = setTimeout(() => startMusic(), 150);
     return () => {
-      events.forEach((event) => {
-        document.removeEventListener(event, startMusic);
-      });
-      clearTimeout(timer);
+      clearTimeout(t);
+      events.forEach((e) => document.removeEventListener(e, unmuteOnInteraction));
     };
   }, []);
 
-  // Handle mute/unmute
-  const toggleMute = () => {
+  // Handle audio events
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      console.error('Audio error:', e);
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // Handle mute/unmute and start music
+  const toggleMute = async () => {
     if (audioRef.current) {
+      // If music hasn't started yet, start it first
+      if (!hasStartedRef.current) {
+        try {
+          audioRef.current.volume = 0.7;
+          await audioRef.current.play();
+          setIsPlaying(true);
+          setIsMuted(false);
+          hasStartedRef.current = true;
+          setHasStarted(true);
+          return;
+        } catch (err) {
+          console.error('Failed to start music:', err);
+          return;
+        }
+      }
+
+      // Toggle mute/unmute
       if (isMuted) {
         audioRef.current.volume = 0.7;
         setIsMuted(false);
+        // If not playing, try to play
+        if (!isPlaying) {
+          audioRef.current.play().catch(console.error);
+        }
       } else {
         audioRef.current.volume = 0;
         setIsMuted(true);
@@ -67,7 +122,7 @@ export default function AutoMusic() {
         loop
         preload="auto"
         className="hidden"
-        autoPlay
+        crossOrigin="anonymous"
       >
         <source src="/music/romantic-music.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
@@ -79,13 +134,30 @@ export default function AutoMusic() {
         className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-colors border-2 border-rose-200"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        aria-label={isMuted ? 'Unmute music' : 'Mute music'}
+        aria-label={!hasStarted ? 'Start music' : isMuted ? 'Unmute music (tap anywhere to hear)' : 'Mute music'}
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5 }}
       >
         <AnimatePresence mode="wait">
-          {isMuted ? (
+          {!hasStarted ? (
+            <motion.svg
+              key="play"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              width="20"
+              height="20"
+              className="text-rose-500 sm:w-6 sm:h-6"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M8 5v14l11-7z"
+                fill="currentColor"
+              />
+            </motion.svg>
+          ) : isMuted ? (
             <motion.svg
               key="muted"
               initial={{ opacity: 0, scale: 0 }}
@@ -122,8 +194,8 @@ export default function AutoMusic() {
           )}
         </AnimatePresence>
 
-        {/* Ripple effect when not muted */}
-        {!isMuted && (
+        {/* Ripple effect when playing and not muted */}
+        {hasStarted && !isMuted && (
           <motion.div
             className="absolute inset-0 rounded-full border-2 border-rose-400"
             animate={{

@@ -117,14 +117,6 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
               >
                 Yay! You made me the happiest!
               </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-lg sm:text-xl text-lilac-600 mt-4 px-4 font-handwriting"
-              >
-                Scroll down to see our memories together...
-              </motion.p>
             </motion.div>
           )}
         </AnimatePresence>
