@@ -28,8 +28,8 @@ export default function Home() {
         {/* Auto-playing background music */}
         <AutoMusic />
         
-        {/* Header with Love Meter */}
-        <div className="fixed top-6 left-6 z-50">
+        {/* Header with Love Meter - Responsive */}
+        <div className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50">
           <LoveMeter />
         </div>
 
@@ -52,10 +52,10 @@ export default function Home() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1 }}
-              className="fixed bottom-20 left-1/2 transform -translate-x-1/2 text-center px-4 z-50"
+              className="fixed bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 text-center px-4 z-50 w-full max-w-xs sm:max-w-md"
             >
               <motion.p
-                className="text-2xl md:text-3xl font-handwriting text-lilac-700 bg-white/90 backdrop-blur-sm px-8 py-4 rounded-full shadow-lg border-2 border-rose-200"
+                className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-handwriting text-lilac-700 bg-white/90 backdrop-blur-sm px-6 py-3 sm:px-8 sm:py-4 rounded-full shadow-lg border-2 border-rose-200"
                 animate={{
                   scale: [1, 1.05, 1],
                 }}

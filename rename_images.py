@@ -26,7 +26,7 @@ def get_image_files(folder_path: Path) -> List[Path]:
     
     return image_files
 
-def rename_images(folder_path: str = "images", dry_run: bool = False) -> None:
+def rename_images(folder_path: str = "public/images", dry_run: bool = False) -> None:
     """
     Rename all images in the specified folder to sequential names.
     
@@ -67,21 +67,21 @@ def rename_images(folder_path: str = "images", dry_run: bool = False) -> None:
         
         # Skip if already correctly named
         if old_path.name == new_filename:
-            print(f"✓ Already named correctly: {old_path.name}")
+            print(f"Already named correctly: {old_path.name}")
             continue
         
         # Check if target name already exists (and it's not the same file)
         if new_path.exists() and new_path != old_path:
-            print(f"⚠ Warning: '{new_filename}' already exists. Skipping '{old_path.name}'")
+            print(f"Warning: '{new_filename}' already exists. Skipping '{old_path.name}'")
             continue
         
         if dry_run:
-            print(f"[DRY RUN] Would rename: '{old_path.name}' → '{new_filename}'")
+            print(f"[DRY RUN] Would rename: '{old_path.name}' -> '{new_filename}'")
         else:
             try:
                 # Rename the file
                 old_path.rename(new_path)
-                print(f"✓ Renamed: '{old_path.name}' → '{new_filename}'")
+                print(f"Renamed: '{old_path.name}' -> '{new_filename}'")
                 renamed_files.append((old_path.name, new_filename))
             except Exception as e:
                 print(f"✗ Error renaming '{old_path.name}': {e}")
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     import sys
     
     # Check for command line arguments
-    folder = "images"
+    folder = "public/images"
     dry_run = False
     
     if len(sys.argv) > 1:

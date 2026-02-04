@@ -26,26 +26,56 @@ interface FloatingMemoryProps {
 function FloatingMemory({ src, index, onLoad, answered, scrollProgress }: FloatingMemoryProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [position, setPosition] = useState({ x: 50, y: 50 });
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Create unique floating pattern for each image
+  // Detect screen size
   useEffect(() => {
-    // Distribute images across the viewport in organic patterns
-    const angle = (index / imagePaths.length) * Math.PI * 4; // Spiral
-    const radius = 150 + (index % 8) * 40;
-    
-    // Calculate position as percentage
-    const baseX = 50 + Math.cos(angle) * (radius / 10);
-    const baseY = 50 + Math.sin(angle) * (radius / 10);
-    
-    setPosition({
-      x: Math.max(8, Math.min(92, baseX)),
-      y: Math.max(10, Math.min(90, baseY)),
-    });
-  }, [index]);
+    const updateScreenSize = () => {
+      if (window.innerWidth < 768) {
+        setScreenSize('mobile');
+      } else if (window.innerWidth < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
 
-  // Size varies by index
-  const size = 80 + (index % 5) * 30;
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+
+  // Create unique floating pattern for each image (responsive)
+  useEffect(() => {
+    const updatePosition = () => {
+      // Distribute images across the viewport in organic patterns
+      const angle = (index / imagePaths.length) * Math.PI * 4; // Spiral
+      const radius = screenSize === 'mobile'
+        ? 100 + (index % 6) * 25  // Tighter on mobile
+        : screenSize === 'tablet'
+        ? 120 + (index % 7) * 30  // Medium on tablet
+        : 150 + (index % 8) * 40; // Full on desktop
+      
+      // Calculate position as percentage
+      const baseX = 50 + Math.cos(angle) * (radius / 10);
+      const baseY = 50 + Math.sin(angle) * (radius / 10);
+      
+      setPosition({
+        x: Math.max(screenSize === 'mobile' ? 10 : 8, Math.min(screenSize === 'mobile' ? 90 : 92, baseX)),
+        y: Math.max(screenSize === 'mobile' ? 15 : 10, Math.min(screenSize === 'mobile' ? 85 : 90, baseY)),
+      });
+    };
+
+    updatePosition();
+  }, [index, screenSize]);
+
+  // Responsive size varies by index and screen size
+  const size = screenSize === 'mobile'
+    ? 60 + (index % 4) * 20  // Smaller on mobile
+    : screenSize === 'tablet'
+    ? 70 + (index % 5) * 25  // Medium on tablet
+    : 80 + (index % 5) * 30; // Full size on desktop
   const rotation = (index % 7 - 3) * 8;
   
   // Delay based on index for staggered appearance
@@ -84,10 +114,11 @@ function FloatingMemory({ src, index, onLoad, answered, scrollProgress }: Floati
         damping: 15,
       }}
       whileHover={{
-        scale: 1.3,
+        scale: screenSize !== 'mobile' ? 1.3 : 1.1,
         zIndex: 100,
         opacity: 1,
       }}
+      className="pointer-events-auto md:pointer-events-none"
     >
       {/* Photo with decorative frame */}
       <div
@@ -143,9 +174,9 @@ function FloatingMemory({ src, index, onLoad, answered, scrollProgress }: Floati
           </div>
         </motion.div>
 
-        {/* Floating heart decoration */}
+        {/* Floating heart decoration - responsive size */}
         <motion.div
-          className="absolute -top-2 -right-2 text-rose-400"
+          className="absolute -top-1 -right-1 md:-top-2 md:-right-2 text-rose-400"
           animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 15, -15, 0],
@@ -156,7 +187,12 @@ function FloatingMemory({ src, index, onLoad, answered, scrollProgress }: Floati
             delay: index * 0.1,
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <svg 
+            width={screenSize === 'mobile' ? "16" : "20"} 
+            height={screenSize === 'mobile' ? "16" : "20"} 
+            viewBox="0 0 24 24" 
+            fill="currentColor"
+          >
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         </motion.div>

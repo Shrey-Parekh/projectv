@@ -22,6 +22,11 @@ export default function NoButton({ onClick, attempts, text }: NoButtonProps) {
   const speedMultiplier = Math.min(3, 1 + attempts * 0.2);
 
   useEffect(() => {
+    // Only enable mouse tracking on desktop
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       
@@ -36,10 +41,11 @@ export default function NoButton({ onClick, attempts, text }: NoButtonProps) {
         const distanceY = e.clientY - buttonCenterY;
         const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
         
-        // If mouse is close, move button away
-        if (distance < 150) {
+        // If mouse is close, move button away (responsive threshold)
+        const threshold = window.innerWidth < 1024 ? 120 : 150;
+        if (distance < threshold) {
           const angle = Math.atan2(distanceY, distanceX);
-          const moveDistance = (150 - distance) * speedMultiplier;
+          const moveDistance = (threshold - distance) * speedMultiplier;
           
           const newX = position.x + Math.cos(angle) * moveDistance;
           const newY = position.y + Math.sin(angle) * moveDistance;
@@ -70,11 +76,11 @@ export default function NoButton({ onClick, attempts, text }: NoButtonProps) {
   }, [attempts]);
 
   return (
-    <div ref={containerRef} className="relative w-64 h-64 md:w-80 md:h-80">
+    <div ref={containerRef} className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80">
       <motion.button
         ref={buttonRef}
         onClick={onClick}
-        className="absolute top-1/2 left-1/2 px-8 py-4 text-xl md:text-2xl font-bold text-lilac-700 rounded-full whitespace-nowrap font-handwriting"
+        className="absolute top-1/2 left-1/2 px-6 py-3 sm:px-8 sm:py-4 text-lg sm:text-xl md:text-2xl font-bold text-lilac-700 rounded-full whitespace-nowrap font-handwriting"
         style={{
           background: 'linear-gradient(135deg, #e8d5ff 0%, #f0e6ff 100%)',
           boxShadow: '0 5px 20px rgba(186, 85, 211, 0.3)',

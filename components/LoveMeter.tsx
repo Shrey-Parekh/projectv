@@ -27,18 +27,18 @@ export default function LoveMeter() {
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : -50 }}
       transition={{ duration: 0.6 }}
-      className="bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border-2 border-rose-200"
+      className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl px-4 py-3 sm:px-6 sm:py-4 shadow-lg border-2 border-rose-200"
     >
       <div className="flex flex-col items-start">
         <motion.div
-          className="text-sm text-lilac-600 font-handwriting mb-1"
+          className="text-xs sm:text-sm text-lilac-600 font-handwriting mb-1"
           animate={{ opacity: [1, 0.7, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           Days Together
         </motion.div>
         <motion.div
-          className="text-3xl font-bold text-rose-500 font-handwriting"
+          className="text-2xl sm:text-3xl font-bold text-rose-500 font-handwriting"
           key={days}
           initial={{ scale: 1.2 }}
           animate={{ scale: 1 }}
@@ -49,7 +49,7 @@ export default function LoveMeter() {
       </div>
 
       {/* Love meter bar */}
-      <div className="mt-3 w-full h-2 bg-lilac-100 rounded-full overflow-hidden">
+      <div className="mt-2 sm:mt-3 w-full h-1.5 sm:h-2 bg-lilac-100 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full"
           initial={{ width: 0 }}

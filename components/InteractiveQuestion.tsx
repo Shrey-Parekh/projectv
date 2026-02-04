@@ -53,7 +53,7 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
       >
         {/* Main Question */}
         <motion.h1
-          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-12 font-handwriting"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-8 sm:mb-10 md:mb-12 px-4 font-handwriting leading-tight"
           style={{
             background: 'linear-gradient(135deg, #ff3366 0%, #ff6b9d 50%, #c44569 100%)',
             WebkitBackgroundClip: 'text',
@@ -61,10 +61,10 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
             backgroundClip: 'text',
           }}
           animate={{
-            scale: [1, 1.05, 1],
+            scale: [1, 1.03, 1],
           }}
           transition={{
-            duration: 2,
+            duration: 2.5,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -77,13 +77,13 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-xl md:text-2xl text-lilac-600 mb-16 font-handwriting"
+          className="text-lg sm:text-xl md:text-2xl text-lilac-600 mb-12 sm:mb-14 md:mb-16 px-4 font-handwriting"
         >
           (Pretty please?)
         </motion.p>
 
         {/* Buttons Container */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 md:gap-12">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 md:gap-12 px-4">
           <YesButton onClick={handleYes} />
           
           <div className="relative">
@@ -105,7 +105,7 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
               className="mt-16"
             >
               <motion.h2
-                className="text-4xl md:text-6xl font-bold text-rose-500 font-handwriting"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-rose-500 font-handwriting px-4"
                 animate={{
                   rotate: [-2, 2, -2],
                 }}
@@ -121,7 +121,7 @@ export default function InteractiveQuestion({ onAnswer }: InteractiveQuestionPro
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-xl text-lilac-600 mt-4 font-handwriting"
+                className="text-lg sm:text-xl text-lilac-600 mt-4 px-4 font-handwriting"
               >
                 Scroll down to see our memories together...
               </motion.p>

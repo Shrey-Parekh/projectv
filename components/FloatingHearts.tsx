@@ -15,17 +15,26 @@ interface Heart {
 export default function FloatingHearts() {
   const [hearts, setHearts] = useState<Heart[]>([]);
   const [screenHeight, setScreenHeight] = useState(1000);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Set initial screen height
-    setScreenHeight(window.innerHeight);
+    // Set initial screen height and detect mobile
+    const updateScreen = () => {
+      const mobile = window.innerWidth < 768;
+      setScreenHeight(window.innerHeight);
+      setIsMobile(mobile);
+      return mobile;
+    };
+    
+    const mobile = updateScreen();
 
-    // Create initial hearts
-    const initialHearts: Heart[] = Array.from({ length: 15 }, (_, i) => ({
+    // Create initial hearts (fewer on mobile for performance)
+    const heartCount = mobile ? 8 : 15;
+    const initialHearts: Heart[] = Array.from({ length: heartCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 20 + 15,
+      size: mobile ? Math.random() * 15 + 10 : Math.random() * 20 + 15,
       duration: Math.random() * 10 + 15,
       delay: Math.random() * 5,
     }));
@@ -34,24 +43,26 @@ export default function FloatingHearts() {
 
     // Handle window resize
     const handleResize = () => {
-      setScreenHeight(window.innerHeight);
+      updateScreen();
     };
     window.addEventListener('resize', handleResize);
 
-    // Add new hearts periodically
+    // Add new hearts periodically (less frequent on mobile)
     const interval = setInterval(() => {
       setHearts((prev) => {
+        const currentMobile = window.innerWidth < 768;
         const newHeart: Heart = {
           id: Date.now(),
           x: Math.random() * 100,
           y: 100,
-          size: Math.random() * 20 + 15,
+          size: currentMobile ? Math.random() * 15 + 10 : Math.random() * 20 + 15,
           duration: Math.random() * 10 + 15,
           delay: 0,
         };
-        return [...prev.slice(-14), newHeart];
+        const maxHearts = currentMobile ? 7 : 14;
+        return [...prev.slice(-maxHearts), newHeart];
       });
-    }, 3000);
+    }, mobile ? 4000 : 3000);
 
     return () => {
       clearInterval(interval);

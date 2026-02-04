@@ -23,6 +23,17 @@ body {
   * {
     cursor: auto;
   }
+  
+  /* Better touch targets on mobile */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smoother scrolling on mobile */
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .scribble-border {
